@@ -1,0 +1,370 @@
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" Content="Microsoft Visual Studio 6.0">
+<TITLE>WMI Made Easy For C#</TITLE>
+<STYLE>
+DIV.dotnetcoders-code
+{
+    PADDING-RIGHT: 1em;
+    PADDING-LEFT: 1em;
+    FONT-SIZE: small;
+    PADDING-BOTTOM: 1em;
+    MARGIN: 1em;
+    COLOR: #000000;
+    PADDING-TOP: 1em;
+    FONT-FAMILY: "Verdana", "Lucida Console", "courier new", courier;
+    BACKGROUND-COLOR: gainsboro
+}
+DIV.dotnetcoders-code SPAN.comment
+{
+    COLOR: #009900
+}
+DIV.dotnetcoders-code SPAN.keyword
+{
+    COLOR: #0000ff
+}
+DIV.dotnetcoders-code SPAN.hexadecimal
+{
+    COLOR: #990099
+}
+DIV.dotnetcoders-code SPAN.octal
+{
+    COLOR: #990099
+}
+DIV.dotnetcoders-code SPAN.identifier
+{
+    COLOR: #000000
+}
+DIV.dotnetcoders-code SPAN.userdefined
+{
+    FONT-WEIGHT: bold;
+    COLOR: #333300
+}
+</STYLE>
+</HEAD>
+<BODY>
+<H2><FONT color=navy>WMI Made Easy For C#</FONT></H2>
+<P><STRONG>by Kevin Matthew Goss</STRONG></P>
+<P><FONT face=Verdana>Windows Management is somewhat mystified to most 
+developers, and admittedly I myself was taken aback by it for a while. Recently 
+I attempted to dig in to the .Net Management class and learn WMI a little 
+better. To my surprise, it was quite easy with the accumulated knowledge I have 
+gained in C# along with the WMI reference on MSDN. </FONT></P>
+<P><FONT face=Verdana>WMI is a very powerfull tool, and once you know how to get 
+what you need, it can be invaluable as a time saver. </FONT><FONT 
+face=Verdana>When developing Windows applications, developers often need 
+information a system, either local or remote, that although commonplace, can be 
+very tough to get. There is using the remote registry, but I myself do not allow 
+remote registry access as do many network admins. WMI is usually wide open on 
+networks, assuming you have the privelidges necessary to query it, just as it is 
+with remote registry querying/editing. And although remote registry querying is 
+very simple, WMI appeals to developers for yet another reason: WQL. </FONT></P>
+<P><FONT face=Verdana>WQL allows us to query WMI providers using a SQL-like 
+query language. If you know the provider classes and the fields available, then 
+you can get the info very easily.&nbsp; For instance, if you wanted to get a 
+list of logical drives from a system you would use the 
+following&nbsp;query:</FONT></P>
+<BLOCKQUOTE dir=ltr style="MARGIN-RIGHT: 0px">
+  <P dir=ltr style="MARGIN-RIGHT: 0px"><STRONG><FONT face=Verdana 
+  color=navy>Select * from <A target=_blank 
+  href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/win32_logicaldisk.asp?frame=true">Win32_LogicalDisk</A></FONT></STRONG></P></BLOCKQUOTE>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT face=Verdana>You can, however, refine 
+the search by using where clauses and getting specific "fields" in the query. 
+The following query gets the amount of freespace, the size, and the name of all 
+fixed disk drives:</FONT></P>
+<BLOCKQUOTE dir=ltr style="MARGIN-RIGHT: 0px">
+  <P dir=ltr style="MARGIN-RIGHT: 0px"><STRONG><FONT face=Verdana 
+  color=navy>Select FreeSpace,Size,Name from <A target=_blank 
+  href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/win32_logicaldisk.asp?frame=true">Win32_LogicalDisk</A> 
+  where DriveType=3</FONT></STRONG></P></BLOCKQUOTE>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT face=Verdana color=black>As you can 
+see,&nbsp;constructing a simple&nbsp;WMI query&nbsp;is quite easy.&nbsp; To get 
+results, you need and interface, and in .Net it is provided by 
+the&nbsp;System.Management namespace.&nbsp; To make it work all you need is a 
+query, and a little bit of code, just as if you were querying a 
+database.</FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT face=Verdana 
+color=black>You need a few different objects to perform WMI 
+queries in .Net.&nbsp; They include the following:<BR><BR>(all within 
+System.Management)</FONT></P>
+<UL dir=ltr>
+  <LI>
+<DIV style="MARGIN-RIGHT: 0px"> <FONT 
+  face=Verdana>ConnectionOptions&nbsp;</FONT></DIV>
+  <LI>
+<DIV style="MARGIN-RIGHT: 0px"> <FONT 
+  face=Verdana>ManagementScope</FONT></DIV>
+  <LI>
+<DIV style="MARGIN-RIGHT: 0px"> <FONT 
+  face=Verdana>ObjectQuery</FONT></DIV>
+  <LI>
+<DIV style="MARGIN-RIGHT: 0px"> <FONT 
+  face=Verdana>ManagementObjectSearcher</FONT></DIV>
+  <LI>
+<DIV style="MARGIN-RIGHT: 0px"> <FONT 
+  face=Verdana>ManagementObjectCollection</FONT></DIV>
+  <LI>
+<DIV style="MARGIN-RIGHT: 0px"> <FONT 
+  face=Verdana>ManagementObject</FONT></DIV></LI></UL>
+<P style="MARGIN-RIGHT: 0px"> <FONT face=Verdana>Though this 
+may seem&nbsp;like a lot of objects&nbsp;to perform&nbsp;a simple query, it is 
+quite easy in practice.&nbsp; I will not go into great detail on the objects 
+(you can review each object in the .Net documentation as they are documented 
+very thoroughly).&nbsp; I will attempt to show a very easy way of utilizing 
+these objects to query WMI providers as well as perform intristic methods 
+available on some of the objects.</FONT></P>
+<P style="MARGIN-RIGHT: 0px"> <FONT face=Verdana>The 
+following code shows use the query above on a remote system (MachineX) using 
+user JohnDoe and password JohnsPass:</FONT></P>
+<div class="dotnetcoders-code"><span class="comment">//Connection credentials to the remote computer - not needed if the logged in account has access
+<br></span>ConnectionOptions <span class="identifier">oConn</span> <span class="punctuation">=</span> <span class="keyword">new</span> ConnectionOptions<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">;</span>
+<br><span class="identifier">oConn</span><span class="punctuation">.</span>Username <span class="punctuation">=</span> <span class="string">"JohnDoe"</span><span class="punctuation">;</span>
+<br><span class="identifier">oConn</span><span class="punctuation">.</span>Password <span class="punctuation">=</span> <span class="string">"JohnsPass"</span><span class="punctuation">;</span> <BR>
+<br>System<span class="punctuation">.</span>Management<span class="punctuation">.</span>ManagementScope <span class="identifier">oMs</span> <span class="punctuation">=</span> <span class="keyword">new</span> System<span class="punctuation">.</span>Management<span class="punctuation">.</span>ManagementScope<span class="punctuation">(</span><span class="string">"\\\\MachineX"</span><span class="punctuation">,</span> <span class="identifier">oConn</span><span class="punctuation">)</span><span class="punctuation">;</span>&nbsp;&nbsp;&nbsp;&nbsp;  
+<br>
+<br><span class="comment">//get Fixed disk stats
+<br></span>System<span class="punctuation">.</span>Management<span class="punctuation">.</span>ObjectQuery <span class="identifier">oQuery</span> <span class="punctuation">=</span> <span class="keyword">new</span> System<span class="punctuation">.</span>Management<span class="punctuation">.</span>ObjectQuery<span class="punctuation">(</span><span class="string">"select FreeSpace,Size,Name from&nbsp;Win32_LogicalDisk where DriveType=3"</span><span class="punctuation">)</span><span class="punctuation">;</span> <BR><BR><SPAN class=comment>//Execute the 
+query&nbsp;</SPAN>
+<br>ManagementObjectSearcher <span class="identifier">oSearcher</span> <span class="punctuation">=</span> <span class="keyword">new</span> ManagementObjectSearcher<span class="punctuation">(</span><span class="identifier">oMs</span><span class="punctuation">,</span><span class="identifier">oQuery</span><span class="punctuation">)</span><span class="punctuation">;</span> <BR>
+<br><SPAN 
+class=comment>//Get the results<BR></SPAN>ManagementObjectCollection <span class="identifier">oReturnCollection</span> <span class="punctuation">=</span> <span class="identifier">oSearcher</span><span class="punctuation">.</span>Get<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">;</span>&nbsp;&nbsp;&nbsp;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><span class="comment">//loop through found drives and write out info
+<br></span><span class="keyword">foreach</span><span class="punctuation">(</span> ManagementObject <span class="identifier">oReturn</span> <span class="keyword">in</span> <span class="identifier">oReturnCollection</span> <span class="punctuation">)</span> 
+<br><span class="punctuation">{</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Disk name
+<br></span>&nbsp;&nbsp;&nbsp;&nbsp;Console<span class="punctuation">.</span>WriteLine<span class="punctuation">(</span><span class="string">"Name : "</span> <span class="punctuation">+</span> <span class="identifier">oReturn</span><span class="punctuation">[</span><span class="string">"Name"</span><span class="punctuation">]</span><span class="punctuation">.</span>ToString<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">;</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Free Space in bytes
+<br></span>&nbsp;&nbsp;&nbsp;&nbsp;Console<span class="punctuation">.</span>WriteLine<span class="punctuation">(</span><span class="string">"FreeSpace: "</span> <span class="punctuation">+</span> <span class="identifier">oReturn</span><span class="punctuation">[</span><span class="string">"FreeSpace"</span><span class="punctuation">]</span><span class="punctuation">.</span>ToString<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">;</span>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Size in bytes
+<br></span>&nbsp;&nbsp;&nbsp;&nbsp;Console<span class="punctuation">.</span>WriteLine<span class="punctuation">(</span><span class="string">"Size: "</span> <span class="punctuation">+</span> <span class="identifier">oReturn</span><span class="punctuation">[</span><span class="string">"Size"</span><span class="punctuation">]</span><span class="punctuation">.</span>ToString<span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">;</span>
+<br><span class="punctuation">}</span>  </div><FONT face=Verdana 
+color=navy>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><BR><FONT color=black>As you can see, the 
+code is not that difficult.&nbsp; This, although a simple query, would save a 
+lot of time compared to other methods, especially when querying a remote 
+machine.&nbsp; Please note that usually the ManagementScope would require a WMI 
+namespace in addition to the machine name, but .Net kindly defaults to the root 
+namespace.&nbsp; If you wish to use it anyway you would use the following 
+scope:</FONT></P>
+<BLOCKQUOTE dir=ltr style="MARGIN-RIGHT: 0px">
+  <P dir=ltr 
+  style="MARGIN-RIGHT: 0px"><A><STRONG>\\\\MachineX\\root\\cimv2</STRONG></A>&nbsp;(the 
+  double \ is required for string literals in C#)</P></BLOCKQUOTE>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT color=black>One of the problems I had 
+in using WMI with .Net was not knowing what "fields" were available for a given 
+object.&nbsp; I found the class reference on MSDN and all the problems went 
+away,&nbsp; at least most of them.&nbsp; Data type conversions can be a problem, 
+especially with datetime structures.&nbsp; </FONT><FONT color=black>Datetime 
+data types from WMI providers are <EM>not </EM>compatible with .Net DateTime 
+variables.&nbsp; You must use a managed function that you can get from my sample 
+code or by using the </FONT><FONT color=navy><EM>mgmtclassgen </EM></FONT><FONT 
+color=black>utility that comes with the .Net SDK (Thanks to Chetan Parmar for 
+this info and the code).&nbsp; Also, some objects will return <FONT 
+color=navy><EM>null</EM></FONT> in some fields, so make sure to check for it 
+(see sample code).</FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT 
+color=#000000></FONT>&nbsp;</P></FONT>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><STRONG><FONT face=Verdana 
+color=navy><U>WMI Method Invocation</U></FONT></STRONG></P><FONT face=Verdana 
+color=navy>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT color=#000000>Another interesting 
+feature of WMI is the methods that are available with certain objects.&nbsp; For 
+instance, with the Win32_Process object you can use the <FONT color=navy><A 
+href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/getowner_method_in_class_win32_process.asp?frame=true">GetOwner</A></FONT> 
+method to return the name and domain of the user under whom the process is 
+running.&nbsp; You must use the <STRONG><EM><FONT color=navy>Invoke 
+</FONT></EM></STRONG>method of the ManagementObject object and send it the 
+proper parameters.&nbsp; In this case you are only required to send the name of 
+the method as a string ("GetUser") and a 2 element string array for the 
+return.&nbsp; Don't be fooled.&nbsp; Even though the array would <EM>seem</EM> 
+to be used as a <EM>ref</EM>&nbsp; variable, you do not have to declare that way 
+when calling the <STRONG><EM><FONT color=#000080>Invoke 
+</FONT></EM></STRONG>method.&nbsp; </FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT color=#000000>Below is a sample of 
+getting all processes along with the name, user and domain, memory used, 
+priority, and process id for each process.&nbsp; This information is similar to 
+what you see in the task manager.&nbsp; If you want CPU usage you have to use 
+the </FONT><FONT color=black><A 
+href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/win32_perfformatteddata_perfproc_process.asp?frame=true">Win32_PerfFormattedData_PerfProc_Process</A>&nbsp;class 
+which is actually a WMI interface&nbsp;for the perfomance counters.&nbsp; I do 
+not use this class because the <FONT color=navy><A 
+href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/getowner_method_in_class_win32_process.asp?frame=true">GetOwner</A></FONT> 
+method is not available with it.</FONT></P>
+<DIV class=dotnetcoders-code><FONT color=#000000><SPAN 
+class=comment>//Connection credentials to the remote computer - not needed if 
+the logged in account has access <BR></SPAN>ConnectionOptions <SPAN 
+class=identifier>oConn</SPAN> <SPAN class=punctuation>=</SPAN> <SPAN 
+class=keyword>new</SPAN> ConnectionOptions<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> <BR><SPAN 
+class=identifier>oConn</SPAN><SPAN class=punctuation>.</SPAN>Username <SPAN 
+class=punctuation>=</SPAN> <SPAN class=string>"JohnDoe"</SPAN><SPAN 
+class=punctuation>;</SPAN> <BR><SPAN class=identifier>oConn</SPAN><SPAN 
+class=punctuation>.</SPAN>Password <SPAN class=punctuation>=</SPAN> <SPAN 
+class=string>"JohnsPass"</SPAN><SPAN class=punctuation>;</SPAN> 
+<BR><BR>System<SPAN class=punctuation>.</SPAN>Management<SPAN 
+class=punctuation>.</SPAN>ManagementScope <SPAN class=identifier>oMs</SPAN> 
+<SPAN class=punctuation>=</SPAN> <SPAN class=keyword>new</SPAN> System<SPAN 
+class=punctuation>.</SPAN>Management<SPAN 
+class=punctuation>.</SPAN>ManagementScope<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"\\\\MachineX"</SPAN><SPAN class=punctuation>,</SPAN> <SPAN 
+class=identifier>oConn</SPAN><SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>;</SPAN>&nbsp;&nbsp;&nbsp;&nbsp; <BR><BR></FONT><FONT 
+color=#000000><SPAN class=comment>//get Process objects <BR></SPAN>System<SPAN 
+class=punctuation>.</SPAN>Management<SPAN class=punctuation>.</SPAN>ObjectQuery 
+<SPAN class=identifier>oQuery</SPAN> <SPAN class=punctuation>=</SPAN> <SPAN 
+class=keyword>new</SPAN> System<SPAN class=punctuation>.</SPAN>Management<SPAN 
+class=punctuation>.</SPAN>ObjectQuery<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"Select * from Win32_Process"</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> <BR><SPAN 
+class=keyword>foreach</SPAN><SPAN class=punctuation>(</SPAN> ManagementObject 
+<SPAN class=identifier>oReturn</SPAN> <SPAN class=keyword>in</SPAN> <SPAN 
+class=identifier>oReturnCollection</SPAN> <SPAN class=punctuation>)</SPAN> 
+<BR><SPAN class=punctuation>{</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT 
+color=#000000><SPAN class=comment>//Name of process 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;Console<SPAN 
+class=punctuation>.</SPAN>WriteLine<SPAN class=punctuation>(</SPAN><SPAN 
+class=identifier>oReturn</SPAN><SPAN class=punctuation>[</SPAN><SPAN 
+class=string>"Name"</SPAN><SPAN class=punctuation>]</SPAN><SPAN 
+class=punctuation>.</SPAN>ToString<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>.</SPAN>ToLower<SPAN 
+class=punctuation>(</SPAN><SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT color=#000000><SPAN class=comment>//arg 
+to send with method invoke to return user and domain - below is link to SDK doc 
+on it <BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class=keyword>string</SPAN><SPAN 
+class=punctuation>[</SPAN><SPAN class=punctuation>]</SPAN> o <SPAN 
+class=punctuation>=</SPAN> <SPAN class=keyword>new</SPAN> String<SPAN 
+class=punctuation>[</SPAN><SPAN class=number>2</SPAN><SPAN 
+class=punctuation>]</SPAN><SPAN 
+class=punctuation>;</SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT color=#000000><SPAN 
+class=comment>//Invoke the method and populate the o var with the user name and 
+domain <BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN 
+class=identifier>oReturn</SPAN><SPAN class=punctuation>.</SPAN>InvokeMethod<SPAN 
+class=punctuation>(</SPAN><SPAN class=string>"GetOwner"</SPAN><SPAN 
+class=punctuation>,</SPAN><SPAN class=punctuation>(</SPAN><SPAN 
+class=keyword>object</SPAN><SPAN class=punctuation>[</SPAN><SPAN 
+class=punctuation>]</SPAN><SPAN class=punctuation>)</SPAN>o<SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT color=#000000><SPAN 
+class=comment>//write out user info that was returned 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;Console<SPAN 
+class=punctuation>.</SPAN>WriteLine<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"User: "</SPAN> <SPAN class=punctuation>+</SPAN> o<SPAN 
+class=punctuation>[</SPAN><SPAN class=number>1</SPAN><SPAN 
+class=punctuation>]</SPAN><SPAN class=punctuation>+</SPAN> "\\" <SPAN 
+class=punctuation>+</SPAN> o<SPAN class=punctuation>[</SPAN><SPAN 
+class=number>0</SPAN><SPAN class=punctuation>]</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Console<SPAN 
+class=punctuation>.</SPAN>WriteLine<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"PID: "</SPAN> <SPAN class=punctuation>+</SPAN> <SPAN 
+class=identifier>oReturn</SPAN><SPAN class=punctuation>[</SPAN><SPAN 
+class=string>"ProcessId"</SPAN><SPAN class=punctuation>]</SPAN><SPAN 
+class=punctuation>.</SPAN>ToString<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>;</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT 
+color=#000000><SPAN class=comment>//get priority 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class=keyword>if</SPAN><SPAN 
+class=punctuation>(</SPAN><SPAN class=identifier>oReturn</SPAN><SPAN 
+class=punctuation>[</SPAN><SPAN class=string>"Priority"</SPAN><SPAN 
+class=punctuation>]</SPAN> <SPAN class=punctuation>!</SPAN><SPAN 
+class=punctuation>=</SPAN> <SPAN class=keyword>null</SPAN><SPAN 
+class=punctuation>)</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console<SPAN 
+class=punctuation>.</SPAN>WriteLine<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"Priority: "</SPAN> <SPAN class=punctuation>+</SPAN> <SPAN 
+class=identifier>oReturn</SPAN><SPAN class=punctuation>[</SPAN><SPAN 
+class=string>"Priority"</SPAN><SPAN class=punctuation>]</SPAN><SPAN 
+class=punctuation>.</SPAN>ToString<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>;</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp; 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT color=#000000><SPAN class=comment>//get 
+creation date - need managed code function to convert date - 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class=keyword>if</SPAN><SPAN 
+class=punctuation>(</SPAN><SPAN class=identifier>oReturn</SPAN><SPAN 
+class=punctuation>[</SPAN><SPAN class=string>"CreationDate"</SPAN><SPAN 
+class=punctuation>]</SPAN> <SPAN class=punctuation>!</SPAN><SPAN 
+class=punctuation>=</SPAN> <SPAN class=keyword>null</SPAN><SPAN 
+class=punctuation>)</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN 
+class=punctuation>{</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT 
+color=#000000><SPAN class=comment>//get datetime string and convert 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN 
+class=keyword>string</SPAN> s <SPAN class=punctuation>=</SPAN> <SPAN 
+class=identifier>oReturn</SPAN><SPAN class=punctuation>[</SPAN><SPAN 
+class=string>"CreationDate"</SPAN><SPAN class=punctuation>]</SPAN><SPAN 
+class=punctuation>.</SPAN>ToString<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT 
+color=#000000><SPAN class=comment>//see ToDateTime function in sample code 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DateTime <SPAN 
+class=identifier>dc</SPAN> <SPAN class=punctuation>=</SPAN> ToDateTime<SPAN 
+class=punctuation>(</SPAN>s<SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>;</SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT 
+color=#000000><SPAN class=comment>//write out creation date 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console<SPAN 
+class=punctuation>.</SPAN>WriteLine<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"CreationDate: "</SPAN> <SPAN class=punctuation>+</SPAN> <SPAN 
+class=identifier>dc</SPAN><SPAN class=punctuation>.</SPAN>AddTicks<SPAN 
+class=punctuation>(</SPAN><SPAN class=punctuation>-</SPAN>TimeZone<SPAN 
+class=punctuation>.</SPAN>CurrentTimeZone<SPAN 
+class=punctuation>.</SPAN>GetUtcOffset<SPAN 
+class=punctuation>(</SPAN>DateTime<SPAN class=punctuation>.</SPAN>Now<SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>.</SPAN>Ticks<SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>.</SPAN>ToLocalTime<SPAN 
+class=punctuation>(</SPAN><SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>.</SPAN>ToString<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>)</SPAN><SPAN 
+class=punctuation>;</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN 
+class=punctuation>}</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp; 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;</FONT><FONT color=#000000><SPAN 
+class=comment>//this is the amount of memory used 
+<BR></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class=keyword>if</SPAN><SPAN 
+class=punctuation>(</SPAN><SPAN class=identifier>oReturn</SPAN><SPAN 
+class=punctuation>[</SPAN><SPAN class=string>"WorkingSetSize"</SPAN><SPAN 
+class=punctuation>]</SPAN> <SPAN class=punctuation>!</SPAN><SPAN 
+class=punctuation>=</SPAN> <SPAN class=keyword>null</SPAN><SPAN 
+class=punctuation>)</SPAN> <BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN 
+class=punctuation>{</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN 
+class=keyword>long</SPAN> <SPAN class=identifier>mem</SPAN> <SPAN 
+class=punctuation>=</SPAN> Convert<SPAN class=punctuation>.</SPAN>ToInt<SPAN 
+class=number>64</SPAN><SPAN class=punctuation>(</SPAN><SPAN 
+class=identifier>oReturn</SPAN><SPAN class=punctuation>[</SPAN><SPAN 
+class=string>"WorkingSetSize"</SPAN><SPAN class=punctuation>]</SPAN><SPAN 
+class=punctuation>.</SPAN>ToString<SPAN class=punctuation>(</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>)</SPAN> <SPAN 
+class=punctuation>/</SPAN> <SPAN class=number>1024</SPAN><SPAN 
+class=punctuation>;</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console<SPAN 
+class=punctuation>.</SPAN>WriteLine<SPAN class=punctuation>(</SPAN><SPAN 
+class=string>"Mem Usage: {0:#,###.##}Kb"</SPAN><SPAN 
+class=punctuation>,</SPAN><SPAN class=identifier>mem</SPAN><SPAN 
+class=punctuation>)</SPAN><SPAN class=punctuation>;</SPAN> 
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class=punctuation>}</SPAN> <BR><SPAN 
+class=punctuation>}</SPAN></FONT></DIV>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT color=black>There is a wealth of 
+information waiting to be gleaned from WMI and it is far easier than using 
+several API calls or remote registry calls.&nbsp; WMI simplifies things by 
+making all common information handy in one place.&nbsp; You can get all system 
+info, partition info, processor stats, profile settings, and much more using 
+WMI.&nbsp; WMI can replace performance counters as well. &nbsp;Once you get used 
+to it, browse through the <A 
+href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/wmi_reference.asp?frame=true">MSDN 
+WMI class reference</A>&nbsp;and you are sure to find what you are looking for 
+in most cases.&nbsp;&nbsp;&nbsp; </FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT color=#000000>I included all of the 
+above code&nbsp;in a sample console project with the source code download, 
+including the datetime conversion function.&nbsp; Happy coding!!!</FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><STRONG>References:</STRONG></FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT face=Verdana>MSDN WMI 
+Reference<BR><FONT face="Times New Roman"><A target=_blank 
+href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/wmi_reference.asp?frame=true">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wmisdk/wmi/wmi_reference.asp?frame=true</A></FONT></FONT></P>
+<P dir=ltr style="MARGIN-RIGHT: 0px"><FONT face=Verdana>Article by John 
+O'Donnell<BR></FONT><A target=_blank 
+href="http://www.dotnet247.com/247reference/a.aspx?u=http://www.c-harpcorner.com/Code/2002/Jan/InterrogatingSystemsWithWMIJO.asp">http://www.dotnet247.com/247reference/a.aspx?u=http://www.c-harpcorner.com/Code/2002/Jan/InterrogatingSystemsWithWMIJO.asp</A></P>
+
+</BODY>
+</HTML>

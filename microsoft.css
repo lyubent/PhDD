@@ -1,0 +1,37 @@
+DIV.dotnetcoders-code
+{
+    PADDING-RIGHT: 1em;
+    PADDING-LEFT: 1em;
+    FONT-SIZE: xx-small;
+    PADDING-BOTTOM: 1em;
+    MARGIN: 1em;
+    COLOR: #000000;
+    PADDING-TOP: 1em;
+    FONT-FAMILY: "Verdana", "Lucida Console", "courier new", courier;
+    BACKGROUND-COLOR: gainsboro
+}
+DIV.dotnetcoders-code SPAN.comment
+{
+    COLOR: #009900
+}
+DIV.dotnetcoders-code SPAN.keyword
+{
+    COLOR: #0000ff
+}
+DIV.dotnetcoders-code SPAN.hexadecimal
+{
+    COLOR: #990099
+}
+DIV.dotnetcoders-code SPAN.octal
+{
+    COLOR: #990099
+}
+DIV.dotnetcoders-code SPAN.identifier
+{
+    COLOR: #000000
+}
+DIV.dotnetcoders-code SPAN.userdefined
+{
+    FONT-WEIGHT: bold;
+    COLOR: #333300
+}

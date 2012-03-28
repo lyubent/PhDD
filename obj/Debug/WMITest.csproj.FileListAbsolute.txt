@@ -1,0 +1,15 @@
+C:\Users\fps700\Music\WMITest\bin\Debug\WMITest.exe
+C:\Users\fps700\Music\WMITest\bin\Debug\WMITest.pdb
+C:\Users\fps700\Music\WMITest\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\fps700\Music\WMITest\obj\Debug\WMITest.exe
+C:\Users\fps700\Music\WMITest\obj\Debug\WMITest.pdb
+C:\Users\fps700\Music\WMITest\bin\Debug\WMITest.exe.manifest
+C:\Users\fps700\Music\WMITest\bin\Debug\WMITest.application
+C:\Users\fps700\Music\WMITest\obj\Debug\WMITest.exe.manifest
+C:\Users\fps700\Music\WMITest\obj\Debug\WMITest.application
+C:\Users\fps700\Music\WMITest\bin\Debug\WMITest.exe.config
+C:\Users\fps700\Music\WMITest\bin\Debug\MySql.Data.dll
+C:\Users\fps700\Music\WMITest\bin\Debug\System.Data.dll
+C:\Users\fps700\Music\WMITest\bin\Debug\System.dll
+C:\Users\fps700\Music\WMITest\bin\Debug\System.Management.dll
+C:\Users\fps700\Music\WMITest\bin\Debug\System.XML.dll
