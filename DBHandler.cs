@@ -29,7 +29,7 @@ namespace WMITest
             cmd.CommandText = sqlStatement;
 
             try { conn.Open(); cmd.ExecuteNonQuery(); }
-            catch (Exception err) { Console.WriteLine("Exception Occured: " + err.Message); return false; }
+            catch (Exception err) { Console.WriteLine("[-]\tException Occured: " + err.Message + " [-]"); return false; }
             finally{ conn.Close(); }
 
             return true;
@@ -58,7 +58,11 @@ namespace WMITest
                 while (r.Read())
                     Console.WriteLine(r["Username"].ToString());
             }
-            catch (Exception err) { Console.WriteLine("Exception Occured: " + err.Message); return false; }
+            catch (Exception err) 
+            { 
+                Console.WriteLine("[-]\tConnection Exception Occured: "
+                + err.Message + " [-]"); return false; 
+            }
             finally{ conn.Close(); }
 
             return true;

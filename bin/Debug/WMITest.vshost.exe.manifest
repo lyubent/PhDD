@@ -4,7 +4,7 @@
   <description asmv2:iconFile="App.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="WMITest" version="1.0.4470.34243" language="neutral" processorArchitecture="msil" />
+    <assemblyIdentity name="WMITest" version="1.0.4471.3072" language="neutral" processorArchitecture="msil" />
     <commandLine file="WMITest.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -55,14 +55,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WMITest.exe" size="36864">
-      <assemblyIdentity name="WMITest" version="1.0.4470.34243" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WMITest.exe" size="40960">
+      <assemblyIdentity name="WMITest" version="1.0.4471.3072" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>bGd0THIAelYtUeSip6P/T2H091k=</dsig:DigestValue>
+        <dsig:DigestValue>KU7rzNyzfGSXVrCyKks55CxrJNQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

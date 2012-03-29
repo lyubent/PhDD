@@ -74,7 +74,7 @@ namespace WMITest
             }
             catch (Exception e)
             {
-                Console.WriteLine(String.Format("Exception {0} Trace {1}", e.Message, e.StackTrace));
+                Console.WriteLine(String.Format("[-]\tException {0} Trace {1} + \n[-]", e.Message, e.StackTrace));
             }
 
             return Value;
@@ -107,7 +107,8 @@ namespace WMITest
                 data.Add(getSMARTAttr(0xC1).ToString());   // Load/Unload cycle count
                 return data;
             }
-            catch (Exception err) { Console.WriteLine("Exception getting SMART " + err.Message); return data; }
+            catch (Exception err) { Console.WriteLine("[-]\tException getting SMART " 
+                + err.Message + " [-]"); return data; }
         }
 
         static string getTemp()
@@ -133,12 +134,61 @@ namespace WMITest
 
         public void displayData(List<string> data)
         {
-            Console.WriteLine("HDD Data\n_________________________\n");
-            int i = 0;
+            Console.WriteLine("\tModel: " + data[0].Trim());
+            Console.Write("\tHDD Temp: "); formatTempColour(data[1].Trim());
+            Console.Write("\tHDD Load/Unload Cycles: "); formatCycleColour(data[2].Trim());
 
-            Console.WriteLine("Model: " + data[0].Trim());
-            Console.WriteLine("HDD Temp: " + data[1].Trim());
-            Console.WriteLine("HDD Load/Unload Cycles: " + data[2].Trim());
+            Console.Write("__________________________________________________________________\nPhDD >");
+        }
+
+        private void formatTempColour(string data)
+        {
+            int temp;
+            int.TryParse(data, out temp);
+
+            if (temp < 33)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine(temp);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            else if (temp > 33 && temp < 43)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(temp);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            else if (temp > 43)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(temp);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+        }
+
+        private void formatCycleColour(string data)
+        {
+            int loadCycleCount;
+            int.TryParse(data, out loadCycleCount);
+
+            if (loadCycleCount < 150000)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine(loadCycleCount);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            else if (loadCycleCount > 150000 && loadCycleCount < 300000)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(loadCycleCount);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            else if (loadCycleCount > 300000)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(loadCycleCount);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
         }
     }
 }

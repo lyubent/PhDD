@@ -66,7 +66,8 @@ namespace WMITest
 
                 file.Flush(); file.Close();
             }
-            catch (Exception err) { Console.WriteLine("Exception generating KEY: " + err.Message); }
+            catch (Exception err) { Console.WriteLine("[-]\tException generating KEY: "
+                + err.Message + "[-]"); }
         }
 
         /// Get key from xml file 
@@ -89,7 +90,8 @@ namespace WMITest
 
                 return key[2].Trim();
             }
-            catch (Exception err) { Console.WriteLine("Exception reading KEY file: " + err.Message); return null; }
+            catch (Exception err) { Console.WriteLine("[-]\tException reading KEY file: "
+                + err.Message + "[-]"); return null; }
         }
 
         /// Generates a key for a user based on their CPU ticks and a random number
