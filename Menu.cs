@@ -16,13 +16,11 @@ namespace WMITest
 
         public static void Main(string[] args)
         {
-            Menu.getAccessLvl();
-
             Menu menu = new Menu();
             Console.Title = " PhDD";
             
             Thread hddMonitor = new Thread(new ThreadStart(menu.Run));
-            hddMonitor.Start();
+            if (Menu.getAccessLvl()) { hddMonitor.Start(); }
 
             bool exit = false;
             string input = "";
@@ -31,7 +29,6 @@ namespace WMITest
                 Console.Write("PhDD >");
 
                 input = Console.ReadLine();
-
 
                 switch (input.ToLower())
                 {
@@ -47,20 +44,21 @@ namespace WMITest
             }
         }
 
+        /// background worker thread for checking the hdd stats every 10 mins
         public void Run()
         {
 
             FileHandler file = new FileHandler();
             HDDHandler hdd = new HDDHandler();
             
+            //initialise key
+            file.init();
+
             while (true)
             {
                 List<string> smartData = new List<string>();
                 try
                 {
-                    //initialise key
-                    file.init();
-                    
                     //update SMART data every 10 mins
                     smartData = hdd.getAttributes();
                     
@@ -69,7 +67,7 @@ namespace WMITest
 
                     if (conversion)
                     {
-                        // model, Temp, Load/Unload, KEY
+                        // 1)model, 2)Temp, 3)Load/Unload, 4)KEY
                         DBHandler.insertData(smartData[0].Trim(),
                             temp, smartData[2], file.getKey());
                     }
@@ -87,12 +85,14 @@ namespace WMITest
             }
         }
 
+
+        /// Menu
         public void displayMenuHelp()
         {
             Console.WriteLine("\n\tCommand line options:\n");
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.Write("\tclean");
+            Console.Write("\tclear");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine("\t-Cleans the screen");
 
@@ -109,10 +109,16 @@ namespace WMITest
             Console.WriteLine("\n\t*commands are not case sensitive.\n");
         }
 
-        static void getAccessLvl()
+        ///checks permissions level
+        static bool getAccessLvl()
         {
-            if(new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+            bool admin = false;
+
+            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+            {
                 Console.ForegroundColor = ConsoleColor.Green;
+                admin = true;
+            }
             else
                 Console.ForegroundColor = ConsoleColor.Red;
 
@@ -121,6 +127,8 @@ namespace WMITest
                 ? "Running as Administrator" : "No admin rights received, restart application as administartor!");
             Console.WriteLine("\n\n");
             Console.ForegroundColor = ConsoleColor.Gray;
+
+            return admin;
         }
     }
 }

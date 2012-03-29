@@ -256,10 +256,8 @@ namespace WMITest
 
         static void doStuff()
         {
-            int i = 0;
             try
             {
-
                 byte TEMPERATURE_ATTRIBUTE = 194;
                 
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"\root\WMI", "SELECT * FROM MSStorageDriver_ATAPISmartData");
